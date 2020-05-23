@@ -11,6 +11,7 @@ jobs:
     
     env:
       REPO: ${{ secrets.DOCKER_REPO }}
+      CORS_ALLOWED_ORIGIN: ${{ secrets.CORS_ALLOWED_ORIGIN }}
 
     steps:
     - uses: actions/checkout@v2
