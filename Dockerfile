@@ -9,8 +9,10 @@ RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ap
 
 FROM alpine:latest
 ARG SOURCE_LOCATION=/
+ARG CORS_ALLOWED_ORIGIN=""
 RUN apk --no-cache add curl
 EXPOSE 8080
 WORKDIR /root/
+ENV CORS_ALLOWED_ORIGIN ${CORS_ALLOWED_ORIGIN}
 COPY --from=builder ${SOURCE_LOCATION} .
 ENTRYPOINT [ "./app" ]
