@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/Kamva/mgm/v2"
 	"github.com/gofiber/cors"
@@ -30,6 +32,8 @@ func init() {
 func main() {
 	app := fiber.New()
 
+	app.Static("/", "./public")
+
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: []string{os.Getenv("CORS_ALLOWED_ORIGIN")},
 	}))
@@ -40,5 +44,24 @@ func main() {
 	app.Put("/api/articles/:id", controllers.UpdateArticle)
 	app.Delete("/api/articles/:id", controllers.DeleteArticle)
 
-	app.Listen(8080)
+	tlsEnabled, _ := strconv.ParseBool(os.Getenv("TLS_ENABLED"))
+
+	if tlsEnabled == true {
+		domain := os.Getenv("TLS_DOMAIN")
+
+		cer, err := tls.LoadX509KeyPair(
+			"/etc/letsencrypt/archive/"+domain+"/fullchain1.pem",
+			"/etc/letsencrypt/archive/"+domain+"/privkey1.pem",
+		)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		config := &tls.Config{Certificates: []tls.Certificate{cer}}
+
+		app.Listen(443, config)
+	} else {
+		app.Listen(8080)
+	}
 }
